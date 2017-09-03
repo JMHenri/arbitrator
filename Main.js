@@ -2,15 +2,22 @@
  * Created by Jake-o on 8/17/2017.
  */
 var events = require('events');
-var data = require('./dataGatherer.js');
 var loginManager = require('./loginManager');
-var eventEmitter = new events.EventEmitter();
+var arbitrage = require('./arbitrageDaemon.js');
+var market = require('./marketDaemon.js');
+var Liqui = require('node.liqui.io');
+
+var apiSecret = '99c53b66ae75db769714e03305b312cb4e2725e5b64c845fb286c82b45fb27cc';
+var apiKey = '5TU8KGT9-KHJDX1KB-Y6PPN02D-V4OS1LUW-M2OEAZU6';
+
+let liqui = new Liqui(apiKey, apiSecret);
 
 
+var daemonManagementEmitter;
 
 //Assign the eventhandler to an event:
-eventEmitter.on('setupFinished', startListeningForArbitrage);
-eventEmitter.on('depthUpdate', analyzeArbitrage);
+var eventEmitter = new events.EventEmitter();
+eventEmitter.on('do', forwardMessage);
 
 
 
@@ -19,28 +26,29 @@ var coinDepthList = {
 };
 
 function setup() {
-    async.waterfall([
-        loginManager.login
-    ], function (err, result) {
-        if (err) {
-            console.log("err: ", err)
-        }
-        eventEmitter.emit('setupFinished');
-        console.log(secondaryCoinArray)
-    });
+    startEmitters();
+}
+function startEmitters() {
+    arbitrageDaemon = new arbitrage.ArbitrageDaemon(eventEmitter);
+    marketDaemon = new market.MarketDaemon();
 }
 
-function startListeningForArbitrage() {
-    var depthUpdater = new data.depthUpdater('eth_omg', eventEmitter);
+function forwardMessage(data){
+    switch(data.to){
+        case 'arbitrageAnalyzer':
+            arbitrageDaemon.emit('do', data);
+            break;
+        case 'market':
+            marketDaemon.emit('do', data);
+        default:
+            break;
+
+    }
 }
-function analyzeArbitrage(currencyPairData){
-    updatePriceList(currencyPairData)
 
-}
-function updatePriceList(currencyPairData){
-    coinDepthList.currencyPairData
+
+function updatePriceList(currencyUpdate){
+    coinDepthList.currencyUpdate.currencyPair = currencyUpdate.currencyPairData;
 }
 
-//setup();
-
-
+setup();
