@@ -20,7 +20,8 @@ var bitcoinAsk;
 var PrimaryCoinPriceDaemon = (function () {
     function PrimaryCoinPriceDaemon(parentDaemon) {
         var self = this
-
+        this.bitcoinPrice;
+        this.ethereumPrice;
         this.logLevel = 1;
         this.parentDaemon = parentDaemon;
 
@@ -29,22 +30,11 @@ var PrimaryCoinPriceDaemon = (function () {
 
     }
 
-        PrimaryCoinPriceDaemon.prototype.bitcoinUpdate = function() {
+    PrimaryCoinPriceDaemon.prototype.bitcoinUpdate = function() {
         publicClientBTC.getProductOrderBook({'level': 2}, callback);
         function callback(err, res, body) {
-
-            if(err){
-                console.log('GDAX PRICE FAIL')
-                bitcoinAsk = undefined;
-                bitcoinBid = undefined;
-            }
-            else{
-                console.log();
-                console.log('new btc price ' + body.asks[0][0])
-                bitcoinAsk = body.asks[0][0];
-                bitcoinBid = body.bids[0][0];
-            }
-
+            bitcoinAsk = body.asks[0][0];
+            bitcoinBid = body.bids[0][0];
         }
     };
 
@@ -52,23 +42,13 @@ var PrimaryCoinPriceDaemon = (function () {
     PrimaryCoinPriceDaemon.prototype.ethereumUpdate = function() {
         publicClientETH.getProductOrderBook({'level': 2}, callback);
         function callback(err, res, body){
-            if(err){
-                ethereumBid = undefined
-                ethereumAsk = undefined
-            }
-            else
-            {
-                console.log();
-                console.log('new eth price ' + body.asks[0][0])
-                ethereumBid = body.bids[0][0];
-                ethereumAsk = body.asks[0][0];
-            }
-
+            ethereumBid = body.bids[0][0];
+            ethereumAsk = body.asks[0][0];
         }
     };
 
-    PrimaryCoinPriceDaemon.prototype.getBitcoinPrice = function(){
-        if(bitcoinAsk > 3000){
+    PrimaryCoinPriceDaemon.prototype.getBitcoinAsk = function(){
+        if(bitcoinPrice > 3000){
             return bitcoinAsk;
         }
         else{
@@ -76,16 +56,15 @@ var PrimaryCoinPriceDaemon = (function () {
         }
     };
     PrimaryCoinPriceDaemon.prototype.getBitcoinBid = function(){
-        if(bitcoinBid > 3000){
+        if(bitcoinPrice > 3000){
             return bitcoinBid;
         }
         else{
             return undefined
         }
     };
-    PrimaryCoinPriceDaemon.prototype.getEthereumPrice = function(){
-        if(ethereumAsk > 200){
-
+    PrimaryCoinPriceDaemon.prototype.getEthereumAsk = function(){
+        if(ethereumPrice > 200){
             return ethereumAsk;
 
         }
@@ -94,7 +73,7 @@ var PrimaryCoinPriceDaemon = (function () {
         }
     };
     PrimaryCoinPriceDaemon.prototype.getEthereumBid = function(){
-        if(ethereumBid > 200){
+        if(ethereumPrice > 200){
             return ethereumBid;
 
         }

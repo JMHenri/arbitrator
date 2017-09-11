@@ -2,6 +2,7 @@
  * Created by Jake-o on 8/17/2017.
  */
 var events = require('events');
+var primaryCoinPrice = require('./PrimaryCoinPriceDaemon.js');
 var loginManager = require('./loginManager');
 var arbitrage = require('./arbitrageDaemon.js');
 var market = require('./marketDaemon.js');
@@ -20,17 +21,26 @@ var eventEmitter = new events.EventEmitter();
 eventEmitter.on('do', forwardMessage);
 
 
+process.on('unhandledRejection', (reason) => {
+    console.log('Reason: ' + JSON.stringify(reason));
+});
+
+
 
 var coinDepthList = {
     eth_omg: []
 };
 
+var arbitrageDaemon;
+var marketDaemon;
+var primaryCoinPriceDaemon;
 function setup() {
     startEmitters();
 }
 function startEmitters() {
+    primaryCoinPriceDaemon = new primaryCoinPrice.PrimaryCoinPriceDaemon(eventEmitter);
+    marketDaemon = new market.MarketDaemon(eventEmitter,primaryCoinPriceDaemon);
     arbitrageDaemon = new arbitrage.ArbitrageDaemon(eventEmitter);
-    marketDaemon = new market.MarketDaemon();
 }
 
 function forwardMessage(data){
