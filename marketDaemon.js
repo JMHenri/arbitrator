@@ -4,23 +4,13 @@ var events = require('events');
 
 var Liqui = require('node.liqui.io');
 //all
-var apiSecret = '88b28dcb154fd545b69c166012ac8aaa02535722313ebdf49f1788bee4e758d2'
-var apiKey = 'HL5GQ4EO-TBWB8NI5-QVESEF9R-42J6LDNB-AGOLTELH'
 
-// home
-// var apiSecret = '99c53b66ae75db769714e03305b312cb4e2725e5b64c845fb286c82b45fb27cc';
-// var apiKey = '5TU8KGT9-KHJDX1KB-Y6PPN02D-V4OS1LUW-M2OEAZU6';
+var apiSecret = '83dd85b534b2371b8db5445510a8dd7115d11eb6e73a7db117812740833457c7';
+var apiKey="4VNMI4N1-ZNNGVF7J-FYTZZ9RP-4TRCTLQ8-FP4L75I6";
 
-// //lenio
-// var apiSecret='c41e985a1af178823f9213e7cdf9febba54fa96d41f3cca53e4091a1d394767a'
-// var apiKey='1A79T0T6-9VVNF43F-IOZGKJCZ-6F9SVTBI-JZL8CTQ5'
-
-
-//eastern
-// var apiSecret = '1003b5e2da6b59fb43e3a8c7c306d2347f93fec71b1e11e69b160073824cb75c';
-// var apiKey = 'Z0WC7AWG-4M6TK8NR-FOMB0HNE-71F96C0T-RS7YZ5TJ';
 
 let liqui = new Liqui(apiKey, apiSecret);
+
 
 
 

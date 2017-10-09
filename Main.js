@@ -8,8 +8,26 @@ var arbitrage = require('./arbitrageDaemon.js');
 var market = require('./marketDaemon.js');
 var Liqui = require('node.liqui.io');
 
-var apiSecret = '99c53b66ae75db769714e03305b312cb4e2725e5b64c845fb286c82b45fb27cc';
-var apiKey = '5TU8KGT9-KHJDX1KB-Y6PPN02D-V4OS1LUW-M2OEAZU6';
+
+var apiSecret = '83dd85b534b2371b8db5445510a8dd7115d11eb6e73a7db117812740833457c7';
+var apiKey="4VNMI4N1-ZNNGVF7J-FYTZZ9RP-4TRCTLQ8-FP4L75I6";
+
+
+
+
+var fs = require('fs');
+var log_file = fs.createWriteStream(__dirname + '/logs/main.log', {flags : 'w'});
+var log_stdout = process.stdout;
+
+// console.log = function(d) { //
+//     log_file.write(d + '\n');
+//     log_stdout.write(d + '\n');
+// };
+
+
+
+
+
 
 let liqui = new Liqui(apiKey, apiSecret);
 
@@ -22,7 +40,8 @@ eventEmitter.on('do', forwardMessage);
 
 
 process.on('unhandledRejection', (reason) => {
-    console.log('Reason: ' + JSON.stringify(reason));
+    console.log("CRITICAL ERROR" + "\n")
+    console.log('Reason: ' + JSON.stringify(reason)+ "\n");
 });
 
 

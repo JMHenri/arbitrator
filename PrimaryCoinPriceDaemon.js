@@ -8,6 +8,10 @@ var publicClientBTC = new Gdax.PublicClient("BTC-USD");
 var bitcoinPriceLocation = 'https://api.coinmarketcap.com/v1/ticker/bitcoin/';
 
 
+
+
+
+
 //publicClient.getProducts(callback);
 
 
@@ -53,6 +57,7 @@ var PrimaryCoinPriceDaemon = (function () {
         publicClientETH.getProductOrderBook({'level': 2}, callback);
         function callback(err, res, body){
             if(err){
+                console.log('GDAX PRICE FAIL')
                 ethereumBid = undefined
                 ethereumAsk = undefined
             }

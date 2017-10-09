@@ -7,6 +7,15 @@ var primaryCoinPriceDaemon = require('./PrimaryCoinPriceDaemon.js');
 
 var PrimaryCoinPriceDaemon = new primaryCoinPriceDaemon.PrimaryCoinPriceDaemon;
 
+
+
+
+
+
+
+
+
+
 var blah;
 var ArbitrageDaemon = (function () {
     function ArbitrageDaemon(parentDaemon) {
@@ -75,7 +84,7 @@ var ArbitrageDaemon = (function () {
         request(options, cb);
         function cb(error, response, body) {
             if (error) {
-                console.log("error " , error)
+                console.log("error " , error + "\n")
                 self.parentDaemon.emit('error',error)
             }
             if (!error && response.statusCode == 200) {
@@ -97,7 +106,7 @@ take in a ticker and handles the all main functional features
  */
 function analyzeResults(body, self){
     body = JSON.parse(body);
-    var coins = ['1st', 'adx','ae','bat','cvc','dash', 'dnt','edg','eos', 'gnt','ltc','mgo','omg', 'round','sngls', 'snm', 'stx', 'tnt','vdg','zrx'];
+    var coins = ['1st', 'adx','ae','bat','cvc','dash', 'dnt','edg','eos', 'gnt','knc', 'ltc','mgo','omg', 'round','salt', 'sngls', 'snm', 'stx', 'tnt','vdg','zrx'];
 
     //rename from dntCoins to coinPairings and throw to a pair analyzer
     coinPairList = {};
@@ -169,7 +178,7 @@ function createAndSendMarketRequests(dataIn){
         }
 
         if(usdPrices.error == undefined){
-            var amountToBuy = figureOutHowMuchToBuyAndSell(usdPrices,data);
+            var amountToBuy = findAmountToBuyAndSell(1,usdPrices,data);
 
             requestTrade(amountToBuy, data);
             if (error) {
@@ -183,15 +192,7 @@ function createAndSendMarketRequests(dataIn){
     }
 }
 
-function figureOutHowMuchToBuyAndSell(usdPrices, data){
-    console.log("data for new trade is " + JSON.stringify(data));
-    console.log("according to preliminary guesses, ratio is " + usdPrices[data[0].sell].bids[0][0]/usdPrices[data[0].buy].asks[0][0]);
 
-    //dollas
-
-    var amountToBuy = applyDollarPriceAndReturnPotentialDepth(1, usdPrices, data);
-    return amountToBuy;
-}
 /*
 data is
 [
@@ -199,72 +200,124 @@ buy: PAIR
 sell: PAIR
 ]
  */
-function applyDollarPriceAndReturnPotentialDepth(dollarPrice, usdPrices, data) {
+function findAmountToBuyAndSell(dollarPrice, usdPrices, data) {
+    console.log("usdPriceChart is " + JSON.stringify(usdPrices)+ "\n")
     var dollarPrice = 0;
-    while(dollarPrice < 50){
+
+    var dollarsLeft;
+    var sellDollarsLeft;
+    var virtualDepth;
+    var buyAmount;
+
+    var copyOfBuyAmount;
+    var amountToSell;
+    //never spend more than 30 at once
+    while(dollarPrice < 30){
+        //tiny increments to find optimal price
         dollarPrice +=1;
-        var dollarsLeft = dollarPrice;
-        var sellDollarsLeft = dollarPrice;
-        var virtualDepth = JSON.parse(JSON.stringify(usdPrices));
+        //temporary Storage Var to decrement
+        dollarsLeft = dollarPrice;
+        //same thing because badly designed function
+        sellDollarsLeft = dollarPrice;
+
+        //clone usdPriceChart because we will be working with it
+        virtualDepth = JSON.parse(JSON.stringify(usdPrices));
         //dictates the amount field when this is complete
-        var buyAmount = 0;
+        buyAmount = 0;
 
 
         while(dollarsLeft > 0.1){
-            temporaryBuyAmout = dollarsLeft / virtualDepth[data[0].buy].asks[0][0];
-            if(temporaryBuyAmout >= virtualDepth[data[0].buy].asks[0][1]){
-                temporaryBuyAmout -= virtualDepth[data[0].buy].asks[0][1];
+            //amount to buy from cheapest ask. dollars / dollars/ coin = coins/1 = coins
+            cheapestAsk_PossibleFill = dollarsLeft / virtualDepth[data[0].buy].asks[0][0];
+            //if we can fill more than the ask (say we can buy 1000 but the ask is selling 100)
+            if(cheapestAsk_PossibleFill >= virtualDepth[data[0].buy].asks[0][1]){
+                    //cheapestAsk_fillable becomes 900, why? mistake, by lowering this amount and then checking in the next if, its a mistake
+                    //cheapestAsk_PossibleFill -= virtualDepth[data[0].buy].asks[0][1];
+                //dollars left is equal to original - buyamount*buyprice
                 dollarsLeft = dollarsLeft - (virtualDepth[data[0].buy].asks[0][1] * virtualDepth[data[0].buy].asks[0][0]);
+                //up the buy amount by what you plan on buying
                 buyAmount += virtualDepth[data[0].buy].asks[0][1];
+                //splice off the cheapest ask
                 virtualDepth[data[0].buy].asks.splice(0,1);
-
-            }else if((temporaryBuyAmout < virtualDepth[data[0].buy].asks[0][1])) {
+            //if we couldn't afford it..
+            }else if((cheapestAsk_PossibleFill < virtualDepth[data[0].buy].asks[0][1])) {
                 dollarsLeft -= dollarsLeft;
-                buyAmount += temporaryBuyAmout;
-                virtualDepth[data[0].buy].asks[0][1] -= temporaryBuyAmout;
+                //add in however much you can get from the cheapest ask
+                buyAmount += cheapestAsk_PossibleFill;
+                //for logging purposes, fill out what you did.
+                virtualDepth[data[0].buy].asks[0][1] -= cheapestAsk_PossibleFill;
 
             }
 
             if(dollarsLeft > 0.1){
-
+                //this probably isn't necessary but its here cause I was confused
                 continue;
             }else if (dollarsLeft <= 0.1){
             };
         }
 
-        while(sellDollarsLeft > 0.1){
-            temporarySellAmount = sellDollarsLeft / virtualDepth[data[0].sell].bids[0][0];
-            if(temporarySellAmount >= virtualDepth[data[0].sell].bids[0][1]){
-                temporarySellAmount -= virtualDepth[data[0].sell].bids[0][1];
-                sellDollarsLeft = sellDollarsLeft - (virtualDepth[data[0].sell].bids[0][1] * virtualDepth[data[0].sell].bids[0][0]);
+        //instead of using sell dollars, I gotta sell the amount that I buy. Done below
+        // while(sellDollarsLeft > 0.1){
+        //     cheapestBid_PossibleFill = sellDollarsLeft / virtualDepth[data[0].sell].bids[0][0];
+        //     if(cheapestBid_PossibleFill >= virtualDepth[data[0].sell].bids[0][1]){
+        //         cheapestBid_PossibleFill -= virtualDepth[data[0].sell].bids[0][1];
+        //         sellDollarsLeft = sellDollarsLeft - (virtualDepth[data[0].sell].bids[0][1] * virtualDepth[data[0].sell].bids[0][0]);
+        //         virtualDepth[data[0].sell].bids.splice(0,1);
+        //
+        //     }else if((cheapestBid_PossibleFill < virtualDepth[data[0].sell].bids[0][1])) {
+        //         sellDollarsLeft -= sellDollarsLeft;
+        //         virtualDepth[data[0].buy].asks[0][1] -= cheapestBid_PossibleFill;
+        //     }
+        //
+        //     if(sellDollarsLeft > 0.1){
+        //         continue;
+        //     }else if (sellDollarsLeft <= 0.1){
+        //
+        //     };
+        // }
+
+
+        /*test zone*/
+        //sell an equivalent amount.
+        //basically, set the var down to 0 then go and check.
+        copyOfBuyAmount = buyAmount;
+        amountToSell = copyOfBuyAmount;
+        while(amountToSell>0.01){
+            if(amountToSell > virtualDepth[data[0].sell].bids[0][1]){
+                amountToSell -= virtualDepth[data[0].sell].bids[0][1];
                 virtualDepth[data[0].sell].bids.splice(0,1);
-
-            }else if((temporarySellAmount < virtualDepth[data[0].sell].bids[0][1])) {
-                sellDollarsLeft -= sellDollarsLeft;
-                virtualDepth[data[0].buy].asks[0][1] -= temporarySellAmount;
             }
-
-            if(sellDollarsLeft > 0.1){
-                continue;
-            }else if (sellDollarsLeft <= 0.1){
-
-            };
+            else if(amountToSell <= virtualDepth[data[0].sell].bids[0][1]){
+                amountToSell -= amountToSell;
+            }
         }
-        if(((virtualDepth[data[0].sell].bids[0][0]/virtualDepth[data[0].buy].asks[0][0]) < 1.0093)){
-            console.log('buy data is figured out, the final ratio is ' + virtualDepth[data[0].sell].bids[0][0]/virtualDepth[data[0].buy].asks[0][0])
+
+
+
+
+
+        //if we're below the solid profit margin
+        if(((virtualDepth[data[0].sell].bids[0][0]/virtualDepth[data[0].buy].asks[0][0]) < 1.00105)){
+            console.log('breaking out early because the ratio was hit before the dollar price cap, ratio is : ' + (virtualDepth[data[0].sell].bids[0][0]/virtualDepth[data[0].buy].asks[0][0])+ "\n");
+            if((virtualDepth[data[0].sell].bids[0][0]/virtualDepth[data[0].buy].asks[0][0])    <  1.007){
+                console.log('critical problemo! price is all jacked'+ "\n")
+            }
             break;
         }
         else{
             continue;
         }
     }
-    console.log("buying " + dollarPrice + " dollars")
+    console.log('buy data is figured out, the final ratio is ' + virtualDepth[data[0].sell].bids[0][0]/virtualDepth[data[0].buy].asks[0][0] + "\n");
+
+    console.log("buying " + dollarPrice + " dollars:, which means buying and selling " + buyAmount+ "\n")
     return buyAmount
 }
 
 function usdtConversion(data,self){
     var coinPairings = JSON.parse(JSON.stringify(data));
     if(PrimaryCoinPriceDaemon.getBitcoinPrice() == undefined || PrimaryCoinPriceDaemon.getEthereumPrice() == undefined){
+        console.log("USD PRICES ARE NULL AND TRADE SHOULD NOT HAPPEN \n");
         return null
     }
     for(var i in coinPairings){
@@ -293,7 +346,7 @@ pairs e.g
     },
     stx:{~},
 }
- */
+*/
 function pairComparator(pairs, self) {
 
     //in here, buy represents bids, sell represents asks
@@ -311,7 +364,8 @@ function pairComparator(pairs, self) {
 
     for (var k in pairListing) {
         if (pairListing[k].btcBuy > 1.0) {
-            if (pairListing[k].btcBuy     > 1.0127) {
+            if (pairListing[k].btcBuy     > 1.0125) {
+                console.log("coin " + k + " is " + JSON.stringify(pairListing[k])+ "\n");
                 console.log();
                 profitableTrades.push({
                     buy: k+'_btc',
@@ -319,12 +373,14 @@ function pairComparator(pairs, self) {
                 })
             }
             else {
-                console.log("coin " + k + " is " + JSON.stringify(pairListing[k]));
+                console.log("coin " + k + " is " + JSON.stringify(pairListing[k])+ "\n");
 
             }
         }
         if (pairListing[k].ethBuy > 1) {
-            if (pairListing[k].ethBuy > 1.0127) {
+            if (pairListing[k].ethBuy > 1.0125) {
+                console.log("coin " + k + " is " + JSON.stringify(pairListing[k])+ "\n");
+
                 console.log();
 
                 profitableTrades.push({
@@ -333,7 +389,7 @@ function pairComparator(pairs, self) {
                 })
             }
             else {
-                console.log("coin " + k + " is " + JSON.stringify(pairListing[k]));
+                console.log("coin " + k + " is " + JSON.stringify(pairListing[k])+ "\n");
 
             }
         }
@@ -362,9 +418,9 @@ var handSet = {
 
 }
 function requestTrade(amount, data){
-    console.log('REQUESTING A TRADE');
-    console.log('amount :' + amount);
-    console.log('trade data :' + JSON.stringify(data));
+    console.log('REQUESTING A TRADE' + "\n");
+    console.log('amount :' + amount + "\n");
+    console.log('trade data :' + JSON.stringify(data) + "\n");
 
     //buy gota be ridiculously low
     blah.parentDaemon.emit('do', {
