@@ -1,4 +1,3 @@
-
 var request = require('request')
 
 var Gdax = require('gdax');
@@ -8,12 +7,7 @@ var publicClientBTC = new Gdax.PublicClient("BTC-USD");
 var bitcoinPriceLocation = 'https://api.coinmarketcap.com/v1/ticker/bitcoin/';
 
 
-
-
-
-
 //publicClient.getProducts(callback);
-
 
 
 var bitcoinBid;
@@ -22,27 +16,29 @@ var ethereumAsk;
 var bitcoinAsk;
 
 var PrimaryCoinPriceDaemon = (function () {
-    function PrimaryCoinPriceDaemon(parentDaemon) {
-        var self = this
 
+    setInterval(bitcoinUpdate, 10000);
+    setInterval(ethereumUpdate, 10000);
+
+    function PrimaryCoinPriceDaemon(parentDaemon) {
+
+        var self = this
         this.logLevel = 1;
         this.parentDaemon = parentDaemon;
 
-        myVar = setInterval(this.bitcoinUpdate, 10000, self);
-        myVar = setInterval(this.ethereumUpdate, 10000, self);
-
     }
 
-        PrimaryCoinPriceDaemon.prototype.bitcoinUpdate = function() {
+    function bitcoinUpdate () {
         publicClientBTC.getProductOrderBook({'level': 2}, callback);
+
         function callback(err, res, body) {
 
-            if(err){
+            if (err) {
                 console.log('GDAX PRICE FAIL')
                 bitcoinAsk = undefined;
                 bitcoinBid = undefined;
             }
-            else{
+            else {
                 console.log();
                 console.log('new btc price ' + body.asks[0][0])
                 bitcoinAsk = body.asks[0][0];
@@ -53,16 +49,16 @@ var PrimaryCoinPriceDaemon = (function () {
     };
 
 
-    PrimaryCoinPriceDaemon.prototype.ethereumUpdate = function() {
+    function ethereumUpdate () {
         publicClientETH.getProductOrderBook({'level': 2}, callback);
-        function callback(err, res, body){
-            if(err){
+
+        function callback(err, res, body) {
+            if (err) {
                 console.log('GDAX PRICE FAIL')
                 ethereumBid = undefined
                 ethereumAsk = undefined
             }
-            else
-            {
+            else {
                 console.log();
                 console.log('new eth price ' + body.asks[0][0])
                 ethereumBid = body.bids[0][0];
@@ -72,38 +68,38 @@ var PrimaryCoinPriceDaemon = (function () {
         }
     };
 
-    PrimaryCoinPriceDaemon.prototype.getBitcoinPrice = function(){
-        if(bitcoinAsk > 3000){
+    PrimaryCoinPriceDaemon.prototype.getBitcoinPrice = function () {
+        if (bitcoinAsk > 3000) {
             return bitcoinAsk;
         }
-        else{
+        else {
             return undefined
         }
     };
-    PrimaryCoinPriceDaemon.prototype.getBitcoinBid = function(){
-        if(bitcoinBid > 3000){
+    PrimaryCoinPriceDaemon.prototype.getBitcoinBid = function () {
+        if (bitcoinBid > 3000) {
             return bitcoinBid;
         }
-        else{
+        else {
             return undefined
         }
     };
-    PrimaryCoinPriceDaemon.prototype.getEthereumPrice = function(){
-        if(ethereumAsk > 200){
+    PrimaryCoinPriceDaemon.prototype.getEthereumPrice = function () {
+        if (ethereumAsk > 200) {
 
             return ethereumAsk;
 
         }
-        else{
+        else {
             return undefined
         }
     };
-    PrimaryCoinPriceDaemon.prototype.getEthereumBid = function(){
-        if(ethereumBid > 200){
+    PrimaryCoinPriceDaemon.prototype.getEthereumBid = function () {
+        if (ethereumBid > 200) {
             return ethereumBid;
 
         }
-        else{
+        else {
             return undefined
         }
     };
@@ -113,4 +109,4 @@ var PrimaryCoinPriceDaemon = (function () {
 
 }());
 
-module.exports = {PrimaryCoinPriceDaemon:PrimaryCoinPriceDaemon};
+module.exports = {PrimaryCoinPriceDaemon: PrimaryCoinPriceDaemon};

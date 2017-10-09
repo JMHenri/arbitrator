@@ -19,10 +19,10 @@ var fs = require('fs');
 var log_file = fs.createWriteStream(__dirname + '/logs/main.log', {flags : 'w'});
 var log_stdout = process.stdout;
 
-// console.log = function(d) { //
-//     log_file.write(d + '\n');
-//     log_stdout.write(d + '\n');
-// };
+console.log = function(d) { //
+    log_file.write(d + ' ' + Date.now() + '\n');
+    log_stdout.write(d + ' ' + Date.now() + '\n');
+};
 
 
 
@@ -40,8 +40,8 @@ eventEmitter.on('do', forwardMessage);
 
 
 process.on('unhandledRejection', (reason) => {
-    console.log("CRITICAL ERROR" + "\n")
-    console.log('Reason: ' + JSON.stringify(reason)+ "\n");
+    console.log("CRITICAL ERROR")
+    console.log('Reason: ' + JSON.stringify(reason));
 });
 
 

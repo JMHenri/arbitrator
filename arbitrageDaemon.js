@@ -201,7 +201,7 @@ sell: PAIR
 ]
  */
 function findAmountToBuyAndSell(dollarPrice, usdPrices, data) {
-    console.log("usdPriceChart is " + JSON.stringify(usdPrices)+ "\n")
+    console.log("usdPriceChart is " + JSON.stringify(usdPrices))
     var dollarPrice = 0;
 
     var dollarsLeft;
@@ -298,9 +298,9 @@ function findAmountToBuyAndSell(dollarPrice, usdPrices, data) {
 
         //if we're below the solid profit margin
         if(((virtualDepth[data[0].sell].bids[0][0]/virtualDepth[data[0].buy].asks[0][0]) < 1.00105)){
-            console.log('breaking out early because the ratio was hit before the dollar price cap, ratio is : ' + (virtualDepth[data[0].sell].bids[0][0]/virtualDepth[data[0].buy].asks[0][0])+ "\n");
+            console.log('breaking out early because the ratio was hit before the dollar price cap, ratio is : ' + (virtualDepth[data[0].sell].bids[0][0]/virtualDepth[data[0].buy].asks[0][0]));
             if((virtualDepth[data[0].sell].bids[0][0]/virtualDepth[data[0].buy].asks[0][0])    <  1.007){
-                console.log('critical problemo! price is all jacked'+ "\n")
+                console.log('critical problemo! price is all jacked')
             }
             break;
         }
@@ -308,16 +308,16 @@ function findAmountToBuyAndSell(dollarPrice, usdPrices, data) {
             continue;
         }
     }
-    console.log('buy data is figured out, the final ratio is ' + virtualDepth[data[0].sell].bids[0][0]/virtualDepth[data[0].buy].asks[0][0] + "\n");
+    console.log('buy data is figured out, the final ratio is ' + virtualDepth[data[0].sell].bids[0][0]/virtualDepth[data[0].buy].asks[0][0]);
 
-    console.log("buying " + dollarPrice + " dollars:, which means buying and selling " + buyAmount+ "\n")
+    console.log("buying " + dollarPrice + " dollars:, which means buying and selling " + buyAmount)
     return buyAmount
 }
 
 function usdtConversion(data,self){
     var coinPairings = JSON.parse(JSON.stringify(data));
     if(PrimaryCoinPriceDaemon.getBitcoinPrice() == undefined || PrimaryCoinPriceDaemon.getEthereumPrice() == undefined){
-        console.log("USD PRICES ARE NULL AND TRADE SHOULD NOT HAPPEN \n");
+        console.log("USD PRICES ARE NULL AND TRADE SHOULD NOT HAPPEN");
         return null
     }
     for(var i in coinPairings){
@@ -365,7 +365,7 @@ function pairComparator(pairs, self) {
     for (var k in pairListing) {
         if (pairListing[k].btcBuy > 1.0) {
             if (pairListing[k].btcBuy     > 1.0125) {
-                console.log("coin " + k + " is " + JSON.stringify(pairListing[k])+ "\n");
+                console.log("coin " + k + " is " + JSON.stringify(pairListing[k]));
                 console.log();
                 profitableTrades.push({
                     buy: k+'_btc',
@@ -373,13 +373,13 @@ function pairComparator(pairs, self) {
                 })
             }
             else {
-                console.log("coin " + k + " is " + JSON.stringify(pairListing[k])+ "\n");
+                console.log("coin " + k + " is " + JSON.stringify(pairListing[k]));
 
             }
         }
         if (pairListing[k].ethBuy > 1) {
             if (pairListing[k].ethBuy > 1.0125) {
-                console.log("coin " + k + " is " + JSON.stringify(pairListing[k])+ "\n");
+                console.log("coin " + k + " is " + JSON.stringify(pairListing[k]));
 
                 console.log();
 
@@ -389,7 +389,7 @@ function pairComparator(pairs, self) {
                 })
             }
             else {
-                console.log("coin " + k + " is " + JSON.stringify(pairListing[k])+ "\n");
+                console.log("coin " + k + " is " + JSON.stringify(pairListing[k]));
 
             }
         }
@@ -418,9 +418,9 @@ var handSet = {
 
 }
 function requestTrade(amount, data){
-    console.log('REQUESTING A TRADE' + "\n");
-    console.log('amount :' + amount + "\n");
-    console.log('trade data :' + JSON.stringify(data) + "\n");
+    console.log('REQUESTING A TRADE' );
+    console.log('amount :' + amount );
+    console.log('trade data :' + JSON.stringify(data));
 
     //buy gota be ridiculously low
     blah.parentDaemon.emit('do', {
