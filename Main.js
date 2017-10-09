@@ -6,6 +6,7 @@ var primaryCoinPrice = require('./PrimaryCoinPriceDaemon.js');
 var loginManager = require('./loginManager');
 var arbitrage = require('./arbitrageDaemon.js');
 var market = require('./marketDaemon.js');
+var wallet = require('./walletDaemon.js');
 var Liqui = require('node.liqui.io');
 
 
@@ -53,10 +54,12 @@ var coinDepthList = {
 var arbitrageDaemon;
 var marketDaemon;
 var primaryCoinPriceDaemon;
+var walletDaemon;
 function setup() {
     startEmitters();
 }
 function startEmitters() {
+    walletDaemon = new wallet.WalletDaemon();
     primaryCoinPriceDaemon = new primaryCoinPrice.PrimaryCoinPriceDaemon(eventEmitter);
     marketDaemon = new market.MarketDaemon(eventEmitter,primaryCoinPriceDaemon);
     arbitrageDaemon = new arbitrage.ArbitrageDaemon(eventEmitter);

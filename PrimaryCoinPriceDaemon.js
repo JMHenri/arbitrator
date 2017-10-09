@@ -16,7 +16,6 @@ var ethereumAsk;
 var bitcoinAsk;
 
 var PrimaryCoinPriceDaemon = (function () {
-
     setInterval(bitcoinUpdate, 10000);
     setInterval(ethereumUpdate, 10000);
 
@@ -39,7 +38,6 @@ var PrimaryCoinPriceDaemon = (function () {
                 bitcoinBid = undefined;
             }
             else {
-                console.log();
                 console.log('new btc price ' + body.asks[0][0])
                 bitcoinAsk = body.asks[0][0];
                 bitcoinBid = body.bids[0][0];
@@ -50,6 +48,7 @@ var PrimaryCoinPriceDaemon = (function () {
 
 
     function ethereumUpdate () {
+        console.log('runnin an eth update')
         publicClientETH.getProductOrderBook({'level': 2}, callback);
 
         function callback(err, res, body) {
@@ -59,7 +58,7 @@ var PrimaryCoinPriceDaemon = (function () {
                 ethereumAsk = undefined
             }
             else {
-                console.log();
+                console.log('XXXX loggin eth!');
                 console.log('new eth price ' + body.asks[0][0])
                 ethereumBid = body.bids[0][0];
                 ethereumAsk = body.asks[0][0];
