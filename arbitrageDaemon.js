@@ -106,7 +106,7 @@ take in a ticker and handles the all main functional features
  */
 function analyzeResults(body, self){
     body = JSON.parse(body);
-    var coins = ['1st', 'adx','ae','bat','cvc','dash', 'dnt','edg','eos', 'gnt','knc', 'ltc','mgo','omg', 'round','salt', 'sngls', 'snm', 'stx', 'tnt','vdg','zrx'];
+    var coins = ['1st', 'adx','ae','bat','bmc','cvc','dash', 'dnt','edg','eos', 'gnt','knc', 'ltc','mgo','omg', 'round','salt', 'sngls', 'snm', 'stx', 'tnt','vdg','zrx'];
 
     //rename from dntCoins to coinPairings and throw to a pair analyzer
     coinPairList = {};

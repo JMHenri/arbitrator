@@ -58,12 +58,15 @@ function trade(data){
             break;
         case 'sell':
             var tempParams = JSON.parse(JSON.stringify(params));
-            tempParams.amount = params.amount/2;
-            liqui.sell(tempParams).then(function(result){
-                console.log("successful sell with params " + JSON.stringify(tempParams));
-                console.log(JSON.stringify(result))
-            });
+            var tempParams2 = JSON.parse(JSON.stringify(params));
+            var tempParams3 = JSON.parse(JSON.stringify(params));
+            tempParams.amount = params.amount;
+            tempParams2.amount = params.amount*95;
+            tempParams3.amount = params.amount*.05;
+
             setTimeout(sellIt,1000,tempParams);
+            setTimeout(sellIt,2000,tempParams2);
+            setTimeout(sellIt,2000,tempParams3);
             break;
     }
 }
